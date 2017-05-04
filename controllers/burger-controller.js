@@ -1,40 +1,53 @@
 // =====================================================
 // Dependencies
 // =====================================================
-var express = require('express');
-var burger = require("../models/burger.js");
-var app = express.Router();
+var express = require("express");
 
-app.get("/", function(req,res){
-    burger.all(function(data){
-        var hbsburger = {
+var router = express.Router();
+
+// Import the model (burger.js) to use its database functions.
+var burger = require("../models/burger.js");
+
+// Create all our routes and set up logic within those routes where required.
+router.get("/", function(req, res) {
+    burger.all(function(data) {
+        var hbsObject = {
             burgers: data
         };
-        console.log(hbsburger);
-        res.render("index", hbsburger);
+        console.log(hbsObject);
+        res.render("index", hbsObject);
     });
 });
 
-app.post("/", function(req,res){
-    burger.create(["burger_name","devoured"],[req.body.name
-        , req.body.devoured], function(){
-        console.log(req.body);
-        res.redirect('/');
-        // console.log("req.body" + req.body);
+router.post("/", function(req, res) {
+    burger.create([
+        "burger_name", "devoured"
+    ], [
+        req.body.name, req.body.devoured
+    ], function() {
+        res.redirect("/");
     });
 });
 
-app.put("/:id", function(req,res){
-    console.log('reqbody' + JSON.stringify(req.body));
-    var condition = 'id = ' + req.params.id;
-    console.log(condition + "condition");
+router.put("/:id", function(req, res) {
+    var condition = "id = " + req.params.id;
+
+    console.log("condition", condition);
+
     burger.update({
-            devoured: req.body.devoured},
-        condition, function() {
-            console.log(req.body);
-
-            res.redirect('/');
-
-        });
+        devoured: req.body.devoured
+    }, condition, function() {
+        res.redirect("/");
+    });
 });
-module.exports = app;
+
+router.delete("/:id", function(req, res) {
+    var condition = "id = " + req.params.id;
+
+    burger.delete(condition, function() {
+        res.redirect("/");
+    });
+});
+
+// Export routes for server.js to use.
+module.exports = router;
